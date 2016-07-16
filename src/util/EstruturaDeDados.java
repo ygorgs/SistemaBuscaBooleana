@@ -1,5 +1,8 @@
 package util;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -76,5 +79,24 @@ public class EstruturaDeDados {
 			return map.get(termo);
 		}
 		return new ArrayList<Integer>();
+	}
+	
+	public void gravarArquivo(){
+		String path = System.getProperty("user.dir") + "\\data\\indice.txt";
+		try {
+			FileWriter arq = new FileWriter(path);
+			PrintWriter gravarArq = new PrintWriter(arq);
+			
+			gravarArq.printf("+--Resultado--+%n");
+			for (String key : map.keySet()) {
+				gravarArq.printf("| %s: %s |%n", key, map.get(key).toString());
+			}
+			gravarArq.printf("+-------------+%n");
+			 
+		    arq.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

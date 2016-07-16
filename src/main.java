@@ -59,7 +59,8 @@ public class main {
 		estrutura = new EstruturaDeDados();
 		for (Documento documento : listaDocumentos) {
 			estrutura.add(documento);
-		}	
+		}
+		estrutura.gravarArquivo();
 	}
 	
 	/**
@@ -115,7 +116,6 @@ public class main {
 		List<Integer> resultado = new ArrayList<Integer>();
 		for (String termo : listaDeTermos) {
 			if(!termo.equals("")){
-				System.out.println(estrutura.buscar(termo));
 				mergeAND(resultado, estrutura.buscar(termo));
 			}
 		}
