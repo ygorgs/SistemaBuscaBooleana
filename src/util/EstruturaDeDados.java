@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import pojo.Documento;
+import pojo.ListaDocumentos;
 
 /**
  * Estrutura de Indices responsável por armazenar os termos contidos nos documentos
@@ -19,13 +20,13 @@ public class EstruturaDeDados {
 	/**
 	 * HashMap contendo os termos e os documentos que eles aparecem
 	 */
-	HashMap<String, List<Integer>> map;
+	HashMap<String, ListaDocumentos> map;
 	
 	/**
 	 * Construtor
 	 */
 	public EstruturaDeDados(){
-		map = new HashMap<String, List<Integer>>();
+		map = new HashMap<String, ListaDocumentos>();
 	}
 	
 	/**
@@ -34,8 +35,18 @@ public class EstruturaDeDados {
 	public void add(Documento doc){
 		getTermos(doc.getTitulo(), doc.getNumero());
 		getTermos(doc.getTexto(), doc.getNumero());
+		calcularIDFs();
 	}
 	
+	/**
+	 * Calcula os IDF's de todos os termos
+	 */
+	private void calcularIDFs() {
+		for (ListaDocumentos list : map.values()) {
+			list.calcularIDF();
+		}
+	}
+
 	/**
 	 * Recupera os termos de uma cadeia de string e os adiciona na HashTable
 	 * @param texto
@@ -43,16 +54,14 @@ public class EstruturaDeDados {
 	 */
 	private void getTermos(String texto, int numero) {
 		String[] lista = texto.split(" ");
-		List<Integer> documentos;
+		ListaDocumentos documentos;
 		for (String termo : lista) {
 			if(!map.containsKey(termo)){
-				documentos = new ArrayList<Integer>();
-				documentos.add(numero);
+				documentos = new ListaDocumentos();
+				documentos.addDocumento(numero);
 				map.put(termo, documentos);
 			} else {
-				if(!map.get(termo).contains(numero)){
-					map.get(termo).add(numero);
-				}
+				map.get(termo).addDocumento(numero);
 			}
 		}
 	}
@@ -62,7 +71,7 @@ public class EstruturaDeDados {
 	 * 
 	 * @return HashTable contendo os temos.
 	 */
-	public HashMap<String, List<Integer>> getMap(){
+	public HashMap<String, ListaDocumentos> getMap(){
 		return map;
 	}
 	
@@ -70,17 +79,33 @@ public class EstruturaDeDados {
 	 * Realiza a busca de um termo na estrutura de indices e retorna os documentos que contém o termo em questão
 	 * (ou uma lista vazia se o termo não existir no mapa).
 	 * 
-	 * @param termo
+	 * @param termos
 	 * 			Termo a ser buscado
 	 * @return Lista contendo os documentos que o termo aparece
 	 */
-	public List<Integer> buscar(String termo){
-		if(map.containsKey(termo)){
-			return map.get(termo);
-		}
-		return new ArrayList<Integer>();
-	}
+	public HashMap<Integer, Double> buscar(String[] termos){
+		return bm25(termos);
+	};
 	
+	private HashMap<Integer, Double> bm25(String[] termos) {
+		Double funcao;
+		HashMap<Integer,Double> resultado = new HashMap<Integer, Double>();
+		for (String palavra : termos) {
+			ListaDocumentos lista = map.get(palavra);
+			for (Integer documento : lista.getDocumentos()) {
+				funcao = (lista.getIDF() * lista.getTF(documento));
+				if(resultado.containsKey(documento)){
+					funcao += resultado.get(documento);
+				}	
+				resultado.put(documento, funcao);
+			}
+		}
+		return resultado;
+	}
+
+	/**
+	 * Escreve em um arquivo a lista de termos presentes no dicionario
+	 */
 	public void gravarArquivo(){
 		String path = System.getProperty("user.dir") + "\\data\\indice.txt";
 		try {

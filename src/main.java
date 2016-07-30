@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
@@ -60,7 +61,8 @@ public class main {
 		for (Documento documento : listaDocumentos) {
 			estrutura.add(documento);
 		}
-		estrutura.gravarArquivo();
+		//TODO deixar assim por enquanto
+//		estrutura.gravarArquivo();
 	}
 	
 	/**
@@ -69,30 +71,21 @@ public class main {
 	 */
 	private static void realizarBusca() {
 		String termo;
-		String algoritmo;
 		
 		System.out.print("\nDigite a Busca: ");
 		termo = input.nextLine();
 		String[] listDeTermos = getListaDosTermos(termo);
 		
+		//resultado da busca dos termos
+		HashMap<Integer, Double> resultado = buscar(listDeTermos);
 		
-		System.out.println("1 - Algoritmo AND");
-		System.out.println("2 - Algoritmo OR");
-		System.out.print("Escolha um Algoritmo: ");
-		algoritmo = input.nextLine();
+		// ordena a lista de documentos obitida
+		List<Integer> listaDeDocumentos = ordernar(resultado);
 		
-		switch (algoritmo) {
-		case "1":
-			buscarAND(listDeTermos);
-			break;
-		case "2":
-			buscarOR(listDeTermos);
-			break;
-		default:
-			break;
-		}
+		// Imprime o resultado obtido
+		imprimir(listaDeDocumentos);
 	}
-	
+
 	/**
 	 * deixa o(s) termo(s) no formato adequado para a aplicação fazer a busca
 	 * 
@@ -111,61 +104,35 @@ public class main {
 	 * 
 	 * @param listaDeTermos
 	 * 			Lista contendo os termos que serão buscados.
+	 * @return 
 	 */
-	private static void buscarAND(String[] listaDeTermos) {
-		List<Integer> resultado = new ArrayList<Integer>();
-		for (String termo : listaDeTermos) {
-			if(!termo.equals("")){
-				mergeAND(resultado, estrutura.buscar(termo));
-			}
-		}
-		System.out.println("\nDocumentos que contém todos termos: ");
-		System.out.println(resultado);
-	};
+	private static HashMap<Integer, Double> buscar(String[] listaDeTermos) {
+		return estrutura.buscar(listaDeTermos);
+	};	
 	
-	/**
-	 * Realiza uma operação AND entre duas listas de documentos.
-	 */
-	private static void mergeAND(List<Integer> resultado, List<Integer> busca) {
-		if(resultado.isEmpty()){
-			resultado.addAll(busca);
-		} else {
-			List<Integer> listaAux = new ArrayList<Integer>();
-			for (Integer documento : busca) {
-				if(resultado.contains(documento)){
-					listaAux.add(documento);
+	private static List<Integer> ordernar(HashMap<Integer, Double> resultado) {
+		List<Integer> lista = new ArrayList<Integer>();
+		List<Double> funcoes = new ArrayList<Double>();
+		funcoes.addAll(resultado.values());
+		Collections.sort(funcoes);
+		for (int i = funcoes.size() - 1; i > funcoes.size() - 6; i--) {
+			for (Integer doc : resultado.keySet()) {
+				if(resultado.get(doc).equals(funcoes.get(i)) && !lista.contains(doc)){
+					lista.add(doc);
+					break;
 				}
 			}
-			resultado.clear();
-			resultado.addAll(listaAux);
 		}
-	}
-
-	/**
-	 * Realiza a busca dos termos usando o algoritmo OR
-	 * 
-	 * @param listaDeTermos
-	 * 			Lista contendo os termos que serão buscados.
-	 */
-	private static void buscarOR(String[] listaDeTermos) {
-		List<Integer> resultado = new ArrayList<Integer>();
-		for (String termo : listaDeTermos) {
-			if(!termo.equals("")){
-				mergeOr(resultado, estrutura.buscar(termo));
-			}
-		}
-		Collections.sort(resultado);
-		System.out.println("\nDocumentos que contém, ao menos, algum dos termos: ");
-		System.out.println(resultado);
+		return lista;
 	}
 	
-	/**
-	 * Realiza uma operação OR entre duas listas de documentos.
-	 */
-	private static void mergeOr(List<Integer> resultado, List<Integer> busca) {
-		for (Integer doc : busca) {
-			if(!resultado.contains(doc)){
-				resultado.add(doc);
+	private static void imprimir(List<Integer> listaDeDocumentos) {
+		if(listaDeDocumentos.size() == 0){
+			System.out.println("Nenhum Documento Encontrado");
+		} else {
+			System.out.println("Ranking dos Documentos: ");
+			for (int i = 0; i < listaDeDocumentos.size(); i++) {
+				System.out.println(i+1  + "º - " + listaDeDocumentos.get(i));
 			}
 		}
 	}
