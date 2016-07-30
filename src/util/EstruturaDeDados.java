@@ -39,7 +39,7 @@ public class EstruturaDeDados {
 	}
 	
 	/**
-	 * Calcula os IDF's de todos os termos
+	 * Calcula os IDF's de todos os termos presentes no mapa
 	 */
 	private void calcularIDFs() {
 		for (ListaDocumentos list : map.values()) {
@@ -48,9 +48,12 @@ public class EstruturaDeDados {
 	}
 
 	/**
-	 * Recupera os termos de uma cadeia de string e os adiciona na HashTable
+	 * Recupera os termos de uma cadeia de string e os adiciona no HashMap
+	 * 
 	 * @param texto
+	 * 		Texto a ser tratado
 	 * @param numero
+	 * 		Número do documento ao qual o texto pertence
 	 */
 	private void getTermos(String texto, int numero) {
 		String[] lista = texto.split(" ");
@@ -87,20 +90,31 @@ public class EstruturaDeDados {
 		return bm25(termos);
 	};
 	
+	/**
+	 * Implementação do algoritmo bm25
+	 * 
+	 * @param termos
+	 * 		Lista de termos a serem buscados
+	 * @return
+	 * 		Mapa contendo os indices dos documentos resultantes da busca junto com o seu valor bm25
+	 */
 	private HashMap<Integer, Double> bm25(String[] termos) {
+		//valor da funcao
 		Double funcao;
 		HashMap<Integer,Double> resultado = new HashMap<Integer, Double>();
-		for (String palavra : termos) {
-			ListaDocumentos lista = map.get(palavra);
-			for (Integer documento : lista.getDocumentos()) {
-				funcao = (lista.getIDF() * lista.getTF(documento));
-				if(resultado.containsKey(documento)){
-					funcao += resultado.get(documento);
-				}	
-				resultado.put(documento, funcao);
+		for (String palavra : termos) { //loop sobre os termos presente na busca
+			if(map.containsKey(palavra)){ // verifica se a palavra esta presente na relação de indices
+				ListaDocumentos lista = map.get(palavra); // recupera a lista de documentos da palavra em questão
+				for (Integer documento : lista.getDocumentos()) {// intera sobre esses documentos
+					funcao = (lista.getIDF() * lista.getTF(documento)); // calcula o valor da função bm25
+					if(resultado.containsKey(documento)){ // se o resultado final ja contem documento, o valor da função bm25 eh somado
+						funcao += resultado.get(documento);
+					}	
+					resultado.put(documento, funcao);//adiciona o documento junto com o seu valor no resultado final
+				}
 			}
 		}
-		return resultado;
+		return resultado;//retorno
 	}
 
 	/**

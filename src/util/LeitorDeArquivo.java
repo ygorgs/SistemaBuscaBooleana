@@ -120,6 +120,8 @@ public class LeitorDeArquivo {
 	
 	/**
 	 * Procura a cadeia de caracteres entre chaves duplas - ex: {{texto}}
+	 * Esse método tambem trata casos onde se inicia com {{ mas não há o fechamento das chaves duplas - ex: {{ alguma coisa
+	 * ou quando se tem termos como esse dentro de outro - ex: {{ultimo {{exemplo}}}}
 	 * 
 	 * @param linha
 	 * 			cadeia de strings que será analisada

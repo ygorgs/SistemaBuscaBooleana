@@ -53,15 +53,18 @@ public class main {
 	 */
 	private static void inicializar() {
 		System.out.println("Lendo arquivo...");
+		//ler o arquivo base e recupera a lista de documentos
 		leitor = new LeitorDeArquivo();
 		List<Documento> listaDocumentos = leitor.ler();
 		
 		System.out.println("Criando estrutura de dados...");
+		//cria a estrutura de dados e adiciona os documentos
 		estrutura = new EstruturaDeDados();
 		for (Documento documento : listaDocumentos) {
 			estrutura.add(documento);
 		}
 		//TODO deixar assim por enquanto
+		//Escrever indices no arquivo
 //		estrutura.gravarArquivo();
 	}
 	
@@ -91,7 +94,7 @@ public class main {
 	 * 
 	 * @param termo 
 	 * 			Linha contendo os termos que o usuário digitou
-	 * @return Array com os termos separados
+	 * @return Array com os termos isolados
 	 */
 	private static String[] getListaDosTermos(String termo) {
 		termo = leitor.limpar(termo);
@@ -100,16 +103,26 @@ public class main {
 	}
 
 	/**
-	 * Realiza a busca dos termos usando o algoritmo AND
+	 * Realiza a busca pelos termos definidos.
 	 * 
 	 * @param listaDeTermos
-	 * 			Lista contendo os termos que serão buscados.
-	 * @return 
+	 * 			lista contendo os termos isolados
+	 * @return
+	 * 			mapa Documento:Função BM25 resultante da busca
 	 */
 	private static HashMap<Integer, Double> buscar(String[] listaDeTermos) {
 		return estrutura.buscar(listaDeTermos);
 	};	
 	
+	/**
+	 * Faz um ranking dos resultados obitidos de forma que os 5 documentos com maiores indices 
+	 * BM25 sejam selecionados para o resultado final.
+	 * 
+	 * @param resultado
+	 * 		Resultado da busca
+	 * @return
+	 * 		Lista contendo os 5 documentos mais relevantes
+	 */
 	private static List<Integer> ordernar(HashMap<Integer, Double> resultado) {
 		List<Integer> lista = new ArrayList<Integer>();
 		List<Double> funcoes = new ArrayList<Double>();
@@ -126,6 +139,12 @@ public class main {
 		return lista;
 	}
 	
+	/**
+	 * Imprime os documentos obtidos em ordem de relevancia.
+	 * 
+	 * @param listaDeDocumentos
+	 * 			Lista dos documentos mais relevantes
+	 */
 	private static void imprimir(List<Integer> listaDeDocumentos) {
 		if(listaDeDocumentos.size() == 0){
 			System.out.println("Nenhum Documento Encontrado");
